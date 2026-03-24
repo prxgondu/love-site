@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Secret Garden 🌙</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@300;500&display=swap" rel="stylesheet">
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+<style>
+body {
+  margin:0;
+  font-family:'Playfair Display',serif;
+  background: radial-gradient(circle at top, #1a1a1a, #000);
+  color:#fff;
+  overflow-x:hidden;
+}
+
+.container {
+  text-align:center;
+  padding:80px 20px;
+  animation:fadeIn 2s ease;
+}
+
+h1 {
+  font-family:'Great Vibes',cursive;
+  font-size:3.5rem;
+  color:#ffb6c1;
+}
+
+.subtitle {
+  opacity:0.7;
+  margin-bottom:30px;
+}
+
+.glass {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(20px);
+  padding:30px;
+  border-radius:25px;
+  box-shadow:0 0 40px rgba(255,105,135,0.15);
+  max-width:400px;
+  margin:auto;
+}
+
+button {
+  background:linear-gradient(45deg,#ff6b81,#ff9aa2);
+  border:none;
+  padding:12px 25px;
+  border-radius:30px;
+  color:white;
+  cursor:pointer;
+  margin-top:15px;
+  transition:0.3s;
+}
+
+button:hover {
+  transform:scale(1.08);
+}
+
+canvas {
+  margin-top:20px;
+  border-radius:15px;
+  border:1px solid rgba(255,255,255,0.2);
+  background:#111;
+}
+
+#garden {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  gap:15px;
+  margin-top:30px;
+}
+
+.flower {
+  background: rgba(255,255,255,0.05);
+  padding:10px;
+  border-radius:15px;
+}
+
+.flower img {
+  width:100%;
+  border-radius:10px;
+}
+
+@keyframes fadeIn {
+  from {opacity:0;}
+  to {opacity:1;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="glass">
+    <h1>For Sandali 💌</h1>
+    <p class="subtitle">Our private little world 🌙</p>
+
+    <canvas id="draw" width="300" height="300"></canvas>
+
+    <button onclick="saveFlower()">Plant in Our Garden 🌸</button>
+  </div>
+
+  <div id="garden"></div>
+</div>
+
+<script>
+// 🔥 FIREBASE CONFIG (YOURS ALREADY INSERTED)
+const firebaseConfig = {
+  apiKey: "AIzaSyCgik00JNaa1Fc7lzBB71-dTURWsScAVWE",
+  authDomain: "love-garden-89d54.firebaseapp.com",
+  databaseURL: "https://love-garden-89d54-default-rtdb.asia-southeast1.firebasedatabase.app/",
+  projectId: "love-garden-89d54",
+  storageBucket: "love-garden-89d54.firebasestorage.app",
+  messagingSenderId: "904466687385",
+  appId: "1:904466687385:web:f34c72ce63fadb6e1edf08"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// 🎨 DRAWING
+let canvas = document.getElementById("draw");
+let ctx = canvas.getContext("2d");
+let drawing=false;
+
+canvas.addEventListener("mousedown",()=>drawing=true);
+canvas.addEventListener("mouseup",()=>drawing=false);
+canvas.addEventListener("mousemove",(e)=>{
+  if(!drawing) return;
+  ctx.fillStyle="#ff9aa2";
+  ctx.beginPath();
+  ctx.arc(e.offsetX,e.offsetY,2,0,Math.PI*2);
+  ctx.fill();
+});
+
+// 🌸 RANDOM NAMES
+const names = [
+  "Sandu Bloom 🌸",
+  "Sandali Rose 🌹",
+  "Sanu Petal 🌺",
+  "My Love Flower 💞"
+];
+
+// 🌸 SAVE
+function saveFlower(){
+  let data = canvas.toDataURL();
+  let name = names[Math.floor(Math.random()*names.length)];
+
+  db.ref("garden").push({
+    img:data,
+    name:name
+  });
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+}
+
+// 🌿 REAL-TIME LOAD
+db.ref("garden").on("child_added",(snap)=>{
+  let f = snap.val();
+
+  let div = document.createElement("div");
+  div.className="flower";
+
+  let img = document.createElement("img");
+  img.src = f.img;
+
+  let p = document.createElement("p");
+  p.innerText = f.name;
+
+  div.appendChild(img);
+  div.appendChild(p);
+
+  document.getElementById("garden").appendChild(div);
+});
+</script>
+
+</body>
+</html>
